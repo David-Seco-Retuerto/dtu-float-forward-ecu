@@ -4,13 +4,15 @@ This document describes some of the main engineering decisions behind the second
 
 The objective of the redesign was not only to replace the development board used during prototyping, but to integrate the required sensing, communication and auxiliary-control interfaces into a compact and configurable PCB suitable for installation in the boat.
 
+> **Design status:** V2 schematic and layout are complete. The PCB has not been manufactured or hardware-validated. Benefits below describe design intent unless explicitly identified as prototype experience. See the [validation plan](validation.md).
+
 ## Integrated ESP32-S3
 
-The first ECU prototype was built around an ESP32-S3 development board, selected for its integrated Wi-Fi connectivity and straightforward MQTT support. This provided a convenient platform for firmware development and allowed the main system architecture to be validated before committing to a fully integrated PCB.
+The first ECU prototype was built around an ESP32-S3 development board, selected for its integrated Wi-Fi connectivity and straightforward MQTT support. This provided a convenient platform for firmware development and allowed the main system architecture to be explored through functional prototyping before committing to a fully integrated PCB.
 
 In Revision 2, the development board was replaced by an **ESP32-S3-WROOM module directly integrated onto the PCB**.
 
-This reduced external wiring and allowed the supporting circuitry, interfaces and GPIO allocation to be designed specifically around the requirements of the ECU.
+This is intended to reduce external wiring and allows the supporting circuitry, interfaces and GPIO allocation to be designed specifically around the requirements of the ECU.
 
 Native USB support was also an important advantage of the ESP32-S3, as it allows firmware programming and debugging without an additional USB-to-UART converter.
 
@@ -26,9 +28,9 @@ The AD7190 was selected after considering several high-resolution ADC alternativ
 * digital filtering flexibility
 * integration complexity
 
-Using an external ADC also provides significantly better low-level measurement capability than relying exclusively on the ESP32-S3 internal ADC.
+The external ADC was selected to target low-level measurements. The achieved noise, accuracy and usable bandwidth of the complete V2 acquisition chain have not been measured.
 
-The final analog subsystem provides four external inputs.
+The analog subsystem exposes four input lines. The AD7190 supports two differential or four pseudo-differential channels using a multiplexer, rather than simultaneous sampling of four differential channels. Its nominal 24-bit conversion format is not a claim of 24-bit board accuracy. See [Analog Devices documentation](https://www.analog.com/en/products/ad7190.html).
 
 Each input includes an RC filter to attenuate high-frequency noise arriving through the external wiring. The analog supply is additionally filtered from the main 5 V rail, with local decoupling around the ADC.
 
@@ -47,7 +49,7 @@ This provides two main advantages:
 
 A three-pad solder bridge on each channel selects the pull-up voltage used by the output stage.
 
-Because the MOSFET stage is inverting, the corresponding inversion is handled in firmware.
+Because the MOSFET stage is inverting, firmware must account for the inversion. These outputs are intended for actuator control inputs; direct motor or pump power switching is outside the documented scope. Pull-up voltage, loaded rise time, sink current and reset-state behavior require verification.
 
 This configuration was chosen to provide a simple hardware interface while keeping the output stage adaptable to different external actuators.
 
@@ -61,10 +63,12 @@ The interface supports:
 
 * selectable pull-up bias
 * selectable pull-down bias
-* series resistance for basic protection
+* series resistance for limited current limiting
 * optional bypass of the series resistor
 
 This allows the same physical GPIO interface to be adapted to external sensors, pilot buttons or other digital devices without redesigning the PCB.
+
+This configuration does not establish overvoltage protection or 5 V tolerance at the microcontroller pins. Connected signal levels must be checked against the device limits.
 
 The solder bridges are intended as assembly-time configuration options rather than switches that are changed during normal operation.
 
@@ -121,4 +125,12 @@ The layout also prioritises accessibility to:
 * supply test points
 * mounting holes
 
-Overall, the layout reflects the main objective of Revision 2: integrating the previously validated functionality into a compact PCB while retaining enough hardware configurability for system integration and future development.
+Overall, the layout reflects the main objective of Revision 2: integrating the functionality developed on the earlier prototype into a compact PCB while retaining enough hardware configurability for system integration and future development.
+
+## Review Limits and Next Steps
+
+The selected screenshots explain circuit intent; they do not replace a review of complete schematics, PCB sources, component ratings and manufacturing outputs. No ERC/DRC report, manufacturing review, RF test or bench measurement is included here.
+
+Before manufacture, verify the module antenna clearance on every copper layer, board geometry and intended enclosure against the [Espressif ESP32-S3 hardware design guidelines](https://www.espressif.com/sites/default/files/documentation/esp32-s3_hardware_design_guidelines_en.pdf). A rendered keepout outline alone does not establish compliance or RF performance.
+
+See [Validation Status and Plan](validation.md) for the remaining checks.

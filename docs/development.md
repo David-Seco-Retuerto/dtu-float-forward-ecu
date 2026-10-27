@@ -2,7 +2,7 @@
 
 The DTU Float Forward ECU was developed through two main hardware iterations.
 
-The goal of the process was to validate the embedded architecture using easily accessible development hardware before integrating the complete system into a custom PCB.
+The goal of the process was to explore and test the embedded architecture using easily accessible development hardware before integrating the complete system into a custom PCB.
 
 ## Revision 1 — Functional Prototype
 
@@ -10,7 +10,7 @@ The first implementation used an **ESP32-S3 development board** as the central c
 
 This approach reduced hardware development time during the early stages of the project and allowed firmware and peripheral integration to be developed before committing to a fully integrated PCB.
 
-The prototype architecture was used to develop and validate the main ECU functionality, including:
+The prototype architecture was used to develop and exercise the main ECU functions listed below. This repository does not include test records or measured results for these functions:
 
 * analog sensor acquisition
 * CAN communication
@@ -68,3 +68,9 @@ The design represents the transition from a development-board-based functional p
 **Revision 2 has not yet been manufactured or hardware-validated.**
 
 For this reason, the functionality demonstrated using the development-board prototype should not be interpreted as hardware validation of the integrated Revision 2 PCB.
+
+## Evidence and Next Milestone
+
+The images in this repository are design exports, not photographs of an assembled V2 board. The documentation records design intent and prototype experience; it does not establish V2 performance, reliability or readiness for operation on the boat.
+
+The next milestone is a pre-manufacture design review followed by assembly and measured bring-up. See [Validation Status and Plan](validation.md). Record future results against the tested hardware revision and firmware version, with test conditions and pass/fail criteria.
